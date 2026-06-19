@@ -1,0 +1,224 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PEGASUS // MARKETPLACE</title>
+
+    <style>
+        :root { --line: #333; --text: #fff; --bg: #000; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 40px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .header {
+            border-bottom: 1px solid var(--line);
+            padding-bottom: 20px;
+            margin-bottom: 40px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1px;
+            background: var(--line);
+            border: 1px solid var(--line);
+        }
+
+        .card {
+            background: var(--bg);
+            padding: 40px;
+            text-align: center;
+            transition: 0.3s;
+        }
+
+        .card:hover {
+            background: #111;
+        }
+
+        .fallback {
+            width: 80px;
+            height: 80px;
+            border: 1px solid var(--line);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            margin: 0 auto 20px;
+        }
+
+        .cover {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border: 1px solid var(--line);
+            margin: 0 auto 20px;
+            display: block;
+        }
+
+        .category {
+            color: #777;
+            font-size: 11px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .description {
+            color: #aaa;
+            font-size: 12px;
+            line-height: 1.4;
+            margin-top: 12px;
+        }
+
+        h1 {
+            letter-spacing: 5px;
+            font-weight: normal;
+        }
+
+        .ascii {
+            font-size: 10px;
+            color: #555;
+            white-space: pre;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="ascii">
+  ____  _____ ____    _    ____  _   _ ____  
+ |  _ \| ____/ ___|  / \  / ___|| | | / ___| 
+ | |_) |  _| \___ \ / _ \ \___ \| | | \___ \ 
+ |  __/| |___ ___) / ___ \ ___) | |_| |___) |
+ |_|   |_____|____/_/   \_\____/ \___/|____/ 
+</div>
+
+<div class="header">
+    <h1>PEGASUS // MARKETPLACE</h1>
+</div>
+
+<div class="grid" id="market"></div>
+
+<script>
+    const REPO = "Alexispher/pegasus-marketplace";
+    const FOLDERS = ["Mods", "Plugins", "Themes"];
+
+    async function getGitHubContent(path) {
+        const response = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
+            headers: {
+                "Accept": "application/vnd.github+json"
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Could not load: ${path}`);
+        }
+
+        return response.json();
+    }
+
+    function decodeBase64Content(content) {
+        const cleanContent = content.replace(/\n/g, "");
+        const binary = atob(cleanContent);
+        const bytes = Uint8Array.from(binary, char => char.charCodeAt(0));
+        return new TextDecoder("utf-8").decode(bytes);
+    }
+
+    async function getMarketplaceMetadata(folder, itemName) {
+        const defaultData = {
+            name: itemName,
+            description: "",
+            version: "",
+            author: "",
+            cover: "",
+            tags: []
+        };
+
+        try {
+            const file = await getGitHubContent(`${folder}/${itemName}/marketplace.json`);
+            const jsonText = decodeBase64Content(file.content);
+            const metadata = JSON.parse(jsonText);
+
+            return {
+                ...defaultData,
+                ...metadata
+            };
+        } catch (error) {
+            return defaultData;
+        }
+    }
+
+    function createFallback(name) {
+        const fallback = document.createElement("div");
+        fallback.className = "fallback";
+        fallback.textContent = name.charAt(0).toUpperCase();
+        return fallback;
+    }
+
+    function createCard(data, category) {
+        const card = document.createElement("div");
+        card.className = "card";
+
+        if (data.cover) {
+            const image = document.createElement("img");
+            image.className = "cover";
+            image.src = data.cover;
+            image.alt = data.name;
+            card.appendChild(image);
+        } else {
+            card.appendChild(createFallback(data.name));
+        }
+
+        const categoryElement = document.createElement("div");
+        categoryElement.className = "category";
+        categoryElement.textContent = category;
+        card.appendChild(categoryElement);
+
+        const title = document.createElement("div");
+        title.textContent = data.name.toUpperCase();
+        card.appendChild(title);
+
+        if (data.description) {
+            const description = document.createElement("div");
+            description.className = "description";
+            description.textContent = data.description;
+            card.appendChild(description);
+        }
+
+        return card;
+    }
+
+    async function fetchItems() {
+        const container = document.getElementById("market");
+        container.innerHTML = "";
+
+        for (const folder of FOLDERS) {
+            try {
+                const items = await getGitHubContent(folder);
+
+                for (const item of items) {
+                    if (item.type !== "dir") continue;
+
+                    const metadata = await getMarketplaceMetadata(folder, item.name);
+                    const card = createCard(metadata, folder);
+
+                    container.appendChild(card);
+                }
+            } catch (error) {
+                console.warn(`Folder not loaded: ${folder}`, error);
+            }
+        }
+    }
+
+    fetchItems();
+</script>
+
+</body>
+</html>
+```
