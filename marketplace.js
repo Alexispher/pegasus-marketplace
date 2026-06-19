@@ -1,89 +1,328 @@
 const CATEGORIES = ["mods", "plugins", "themes"];
 
+let marketplaceData = {
+    mods: [],
+    plugins: [],
+    themes: []
+};
+
 function createFallback(name) {
     const fallback = document.createElement("div");
-    fallback.className = "fallback";
-    fallback.textContent = name.charAt(0).toUpperCase();
+    fallback.className = "card-fallback";
+    fallback.textContent = String(name || "?").charAt(0).toUpperCase();
     return fallback;
 }
 
+function createDownloadButton(item) {
+    if (!item.download) return null;
+
+    const button = document.createElement("a");
+    button.className = "download-btn";
+    button.href = item.download;
+    button.setAttribute("download", "");
+    button.setAttribute("title", `Download ${item.name}`);
+    button.setAttribute("aria-label", `Download ${item.name}`);
+    button.innerHTML = "↓";
+
+    return button;
+}
+
 function createCard(item) {
-    const card = document.createElement("div");
+    const card = document.createElement("article");
     card.className = "card";
+
+    const actions = document.createElement("div");
+    actions.className = "card-actions";
+
+    const downloadButton = createDownloadButton(item);
+
+    if (downloadButton) {
+        actions.appendChild(downloadButton);
+    }
+
+    if (actions.childNodes.length > 0) {
+        card.appendChild(actions);
+    }
 
     if (item.cover) {
         const image = document.createElement("img");
-        image.className = "cover";
+        image.className = "card-cover";
         image.src = item.cover;
-        image.alt = item.name;
+        image.alt = item.name || "Marketplace cover";
         card.appendChild(image);
     } else {
         card.appendChild(createFallback(item.name));
     }
 
     const category = document.createElement("div");
-    category.className = "category";
-    category.textContent = item.category.toUpperCase();
+    category.className = "card-category";
+    category.textContent = String(item.category || "").toUpperCase();
     card.appendChild(category);
 
-    const title = document.createElement("div");
-    title.className = "title";
-    title.textContent = item.name.toUpperCase();
+    const title = document.createElement("h3");
+    title.className = "card-title";
+    title.textContent = String(item.name || "Untitled");
     card.appendChild(title);
 
     if (item.description) {
-        const description = document.createElement("div");
-        description.className = "description";
+        const description = document.createElement("p");
+        description.className = "card-description";
         description.textContent = item.description;
         card.appendChild(description);
     }
 
+    const meta = document.createElement("div");
+    meta.className = "card-meta";
+
     if (item.version) {
         const version = document.createElement("div");
-        version.className = "version";
-        version.textContent = `v${item.version}`;
-        card.appendChild(version);
+        version.textContent = `Version: ${item.version}`;
+        meta.appendChild(version);
     }
 
     if (item.author) {
         const author = document.createElement("div");
-        author.className = "author";
-        author.textContent = `by ${item.author}`;
-        card.appendChild(author);
+        author.textContent = `Author: ${item.author}`;
+        meta.appendChild(author);
+    }
+
+    if (item.added_at) {
+        const added = document.createElement("div");
+        added.textContent = `Added: ${item.added_at}`;
+        meta.appendChild(added);
+    }
+
+    if (meta.childNodes.length > 0) {
+        card.appendChild(meta);
     }
 
     return card;
 }
 
-async function loadContent() {
-    const market = document.getElementById("market");
-    market.innerHTML = "";
+function renderEmptyState(containerId, message) {
+    const container = document.getElementById(containerId);
 
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    const empty = document.createElement("div");
+    empty.className = "empty-state";
+    empty.textContent = message;
+
+    container.appendChild(empty);
+}
+
+function renderCategory(containerId, items) {
+    const container = document.getElementById(containerId);
+
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    if (!items || items.length === 0) {
+        renderEmptyState(containerId, "No content found in this section yet.");
+        return;
+    }
+
+    items.forEach(item => {
+        container.appendChild(createCard(item));
+    });
+}
+
+function getAllItems() {
+    const allItems = [];
+
+    CATEGORIES.forEach(category => {
+        if (!Array.isArray(marketplaceData[category])) return;
+
+        marketplaceData[category].forEach(item => {
+            allItems.push({
+                ...item,
+                category
+            });
+        });
+    });
+
+    return allItems;
+}
+
+function renderLatest() {
+    const latestContainer = document.getElementById("latest-grid");
+
+    if (!latestContainer) return;
+
+    latestContainer.innerHTML = "";
+
+    const allItems = getAllItems();
+
+    if (allItems.length === 0) {
+        renderEmptyState("latest-grid", "No new content available yet.");
+        return;
+    }
+
+    const sortedItems = allItems.sort((a, b) => {
+        const dateA = new Date(a.added_at || "1970-01-01").getTime();
+        const dateB = new Date(b.added_at || "1970-01-01").getTime();
+
+        return dateB - dateA;
+    });
+
+    const latestItems = sortedItems.slice(0, 6);
+
+    latestItems.forEach(item => {
+        latestContainer.appendChild(createCard(item));
+    });
+}
+
+async function loadMarketplace() {
     try {
-        const response = await fetch("index.json");
+        const response = await fetch("index.json", {
+            cache: "no-store"
+        });
 
         if (!response.ok) {
-            throw new Error("index.json not found");
+            throw new Error("Failed to load index.json");
         }
 
         const data = await response.json();
 
-        CATEGORIES.forEach(category => {
-            if (!Array.isArray(data[category])) return;
+        marketplaceData = {
+            mods: Array.isArray(data.mods)
+                ? data.mods.map(item => ({ ...item, category: "mods" }))
+                : [],
 
-            data[category].forEach(item => {
-                const card = createCard(item);
-                market.appendChild(card);
-            });
-        });
+            plugins: Array.isArray(data.plugins)
+                ? data.plugins.map(item => ({ ...item, category: "plugins" }))
+                : [],
+
+            themes: Array.isArray(data.themes)
+                ? data.themes.map(item => ({ ...item, category: "themes" }))
+                : []
+        };
+
+        renderLatest();
+        renderCategory("mods-grid", marketplaceData.mods);
+        renderCategory("plugins-grid", marketplaceData.plugins);
+        renderCategory("themes-grid", marketplaceData.themes);
+
     } catch (error) {
-        console.error("Failed to load marketplace index:", error);
+        console.error("Failed to load marketplace:", error);
 
-        const message = document.createElement("div");
-        message.className = "card";
-        message.textContent = "MARKETPLACE INDEX NOT FOUND";
-        market.appendChild(message);
+        renderEmptyState("latest-grid", "Marketplace index not found.");
+        renderEmptyState("mods-grid", "Marketplace index not found.");
+        renderEmptyState("plugins-grid", "Marketplace index not found.");
+        renderEmptyState("themes-grid", "Marketplace index not found.");
     }
 }
 
-loadContent();
+function setupNavHighlight() {
+    const links = document.querySelectorAll(".nav-link");
+
+    if (links.length === 0) return;
+
+    const sections = Array.from(links)
+        .map(link => document.querySelector(link.getAttribute("href")))
+        .filter(Boolean);
+
+    function updateActiveLink() {
+        const scrollPosition = window.scrollY + 140;
+
+        let currentId = "#home";
+
+        sections.forEach(section => {
+            if (scrollPosition >= section.offsetTop) {
+                currentId = `#${section.id}`;
+            }
+        });
+
+        links.forEach(link => {
+            const href = link.getAttribute("href");
+            link.classList.toggle("active", href === currentId);
+        });
+    }
+
+    window.addEventListener("scroll", updateActiveLink);
+    updateActiveLink();
+}
+
+function setupStarfield() {
+    const canvas = document.getElementById("starfield");
+
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+
+    let stars = [];
+    let width = 0;
+    let height = 0;
+    let extraDensity = 0;
+    let lastDensity = -1;
+
+    function resizeCanvas() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+        createStars();
+    }
+
+    function createStars() {
+        const baseCount = Math.floor((width * height) / 11000);
+        const totalStars = baseCount + extraDensity;
+
+        stars = [];
+
+        for (let i = 0; i < totalStars; i++) {
+            stars.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                radius: Math.random() * 1.35 + 0.15,
+                alpha: Math.random() * 0.75 + 0.08,
+                speed: Math.random() * 0.018 + 0.003,
+                pulse: Math.random() * Math.PI * 2
+            });
+        }
+    }
+
+    function drawStars() {
+        ctx.clearRect(0, 0, width, height);
+        ctx.fillStyle = "#000000";
+        ctx.fillRect(0, 0, width, height);
+
+        stars.forEach(star => {
+            star.pulse += star.speed;
+
+            const twinkle = 0.55 + Math.sin(star.pulse) * 0.45;
+            const finalAlpha = Math.max(0.03, star.alpha * twinkle);
+
+            ctx.beginPath();
+            ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255, 255, 255, ${finalAlpha})`;
+            ctx.fill();
+        });
+
+        requestAnimationFrame(drawStars);
+    }
+
+    function updateStarDensityOnScroll() {
+        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = maxScroll > 0 ? window.scrollY / maxScroll : 0;
+
+        const newDensity = Math.floor(progress * 220);
+
+        if (newDensity !== lastDensity) {
+            extraDensity = newDensity;
+            lastDensity = newDensity;
+            createStars();
+        }
+    }
+
+    window.addEventListener("resize", resizeCanvas);
+    window.addEventListener("scroll", updateStarDensityOnScroll);
+
+    resizeCanvas();
+    drawStars();
+}
+
+setupStarfield();
+setupNavHighlight();
+loadMarketplace();
