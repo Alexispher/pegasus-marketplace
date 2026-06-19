@@ -9,6 +9,8 @@
       "version": "1.0.0",
       "author": "Alexispher",
       "cover": "Mods/pegasus-typewriter/cover.png",
+      "download": "packages/mods/pegasus-typewriter.zip",
+      "added_at": "",
       "tags": [
         "writing",
         "editor",
