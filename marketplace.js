@@ -8,7 +8,7 @@ let marketplaceData = {
 };
 
 const ROUTES = {
-    home: ["home", "whats-new"],
+    home: ["home"],
     "whats-new": ["whats-new"],
     mods: ["mods"],
     plugins: ["plugins"],
