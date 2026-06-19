@@ -1,9 +1,18 @@
+```javascript
 const CATEGORIES = ["mods", "plugins", "themes"];
 
 let marketplaceData = {
     mods: [],
     plugins: [],
     themes: []
+};
+
+const ROUTES = {
+    home: ["home", "whats-new"],
+    "whats-new": ["whats-new"],
+    mods: ["mods"],
+    plugins: ["plugins"],
+    themes: ["themes"]
 };
 
 function createFallback(name) {
@@ -206,6 +215,8 @@ async function loadMarketplace() {
         renderCategory("plugins-grid", marketplaceData.plugins);
         renderCategory("themes-grid", marketplaceData.themes);
 
+        setupPageRouter();
+
     } catch (error) {
         console.error("Failed to load marketplace:", error);
 
@@ -213,37 +224,67 @@ async function loadMarketplace() {
         renderEmptyState("mods-grid", "Marketplace index not found.");
         renderEmptyState("plugins-grid", "Marketplace index not found.");
         renderEmptyState("themes-grid", "Marketplace index not found.");
+
+        setupPageRouter();
     }
 }
 
-function setupNavHighlight() {
-    const links = document.querySelectorAll(".nav-link");
+function getCurrentRoute() {
+    const hash = window.location.hash.replace("#", "");
 
-    if (links.length === 0) return;
-
-    const sections = Array.from(links)
-        .map(link => document.querySelector(link.getAttribute("href")))
-        .filter(Boolean);
-
-    function updateActiveLink() {
-        const scrollPosition = window.scrollY + 140;
-
-        let currentId = "#home";
-
-        sections.forEach(section => {
-            if (scrollPosition >= section.offsetTop) {
-                currentId = `#${section.id}`;
-            }
-        });
-
-        links.forEach(link => {
-            const href = link.getAttribute("href");
-            link.classList.toggle("active", href === currentId);
-        });
+    if (ROUTES[hash]) {
+        return hash;
     }
 
-    window.addEventListener("scroll", updateActiveLink);
-    updateActiveLink();
+    return "home";
+}
+
+function showRoute(routeName) {
+    const visibleSections = ROUTES[routeName] || ROUTES.home;
+    const allSections = ["home", "whats-new", "mods", "plugins", "themes"];
+
+    allSections.forEach(sectionId => {
+        const section = document.getElementById(sectionId);
+
+        if (!section) return;
+
+        section.style.display = visibleSections.includes(sectionId) ? "" : "none";
+    });
+
+    updateActiveNav(routeName);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function updateActiveNav(routeName) {
+    const links = document.querySelectorAll(".nav-link");
+
+    links.forEach(link => {
+        const target = link.getAttribute("href").replace("#", "");
+        link.classList.toggle("active", target === routeName);
+    });
+}
+
+function setupPageRouter() {
+    const links = document.querySelectorAll(".nav-link");
+
+    links.forEach(link => {
+        link.addEventListener("click", event => {
+            event.preventDefault();
+
+            const routeName = link.getAttribute("href").replace("#", "");
+
+            if (!ROUTES[routeName]) return;
+
+            history.pushState(null, "", `#${routeName}`);
+            showRoute(routeName);
+        });
+    });
+
+    window.addEventListener("popstate", () => {
+        showRoute(getCurrentRoute());
+    });
+
+    showRoute(getCurrentRoute());
 }
 
 function setupStarfield() {
@@ -324,5 +365,5 @@ function setupStarfield() {
 }
 
 setupStarfield();
-setupNavHighlight();
 loadMarketplace();
+```
