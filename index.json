@@ -1,5 +1,17 @@
 {
-  "mods": [],
+  "mods": [
+    {
+      "id": "pegasus-typewriter",
+      "name": "Pegasus Typewriter",
+      "category": "mods",
+      "path": "Mods/pegasus-typewriter",
+      "description": "",
+      "version": "",
+      "author": "",
+      "cover": "",
+      "tags": []
+    }
+  ],
   "plugins": [],
   "themes": []
 }
