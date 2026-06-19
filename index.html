@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,8 +8,9 @@
 
     <style>
         :root {
-            --bg: #000;
+            --bg: #000000;
             --panel: rgba(0, 0, 0, 0.90);
+            --panel-soft: rgba(6, 6, 6, 0.98);
             --line: #202020;
             --line-soft: #303030;
             --text: #f4f4f4;
@@ -19,6 +21,7 @@
 
         * {
             box-sizing: border-box;
+            scroll-behavior: smooth;
         }
 
         html,
@@ -45,14 +48,14 @@
 
         .saturn-bg {
             position: fixed;
-            left: -34vw;
-            top: 2vh;
-            width: 86vw;
+            left: -38vw;
+            top: 4vh;
+            width: 96vw;
             height: 94vh;
             z-index: 1;
             pointer-events: none;
-            opacity: 0.72;
-            filter: grayscale(1) contrast(1.05) brightness(0.74);
+            opacity: 0.58;
+            filter: grayscale(1) contrast(1.14) brightness(0.58);
         }
 
         .saturn-bg svg {
@@ -67,7 +70,7 @@
             width: min(1520px, calc(100% - 36px));
             margin: 24px auto 80px;
             border: 1px solid var(--line);
-            background: rgba(0, 0, 0, 0.52);
+            background: rgba(0, 0, 0, 0.50);
             min-height: 100vh;
         }
 
@@ -104,6 +107,7 @@
             font-size: 13px;
             letter-spacing: 5px;
             text-transform: uppercase;
+            white-space: nowrap;
         }
 
         .nav {
@@ -136,12 +140,34 @@
             grid-template-columns: 52% 48%;
             border-bottom: 1px solid var(--line);
             background:
-                linear-gradient(90deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.74) 48%, #000 100%);
+                linear-gradient(90deg, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.78) 50%, #000 100%);
         }
 
         .hero-left {
             position: relative;
             border-right: 1px solid rgba(255,255,255,0.07);
+            min-height: 760px;
+        }
+
+        .peggy-feature {
+            position: absolute;
+            left: 31%;
+            top: 51%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            z-index: 8;
+            overflow: hidden;
+            border: 0;
+            background: transparent;
+        }
+
+        .peggy-feature img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            filter: grayscale(1) contrast(1.08) brightness(0.96);
         }
 
         .hero-vertical {
@@ -274,7 +300,7 @@
         .card {
             position: relative;
             min-height: 390px;
-            background: rgba(6,6,6,0.98);
+            background: var(--panel-soft);
             padding: 28px;
             display: flex;
             flex-direction: column;
@@ -378,7 +404,7 @@
         .empty-state {
             min-height: 200px;
             padding: 38px;
-            background: rgba(6,6,6,0.98);
+            background: var(--panel-soft);
             color: var(--muted);
             font-size: 13px;
             line-height: 1.8;
@@ -406,9 +432,14 @@
             }
 
             .saturn-bg {
-                left: -44vw;
-                width: 120vw;
-                opacity: 0.55;
+                left: -45vw;
+                width: 130vw;
+                opacity: 0.48;
+            }
+
+            .peggy-feature {
+                left: 50%;
+                top: 52%;
             }
         }
 
@@ -473,6 +504,11 @@
 
             .cards-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .peggy-feature {
+                width: 230px;
+                height: 230px;
             }
         }
     </style>
@@ -566,7 +602,11 @@
 
         <section class="hero" id="home">
             <div class="hero-left">
-                <div class="hero-vertical">Saturn Archive // Static Background</div>
+                <div class="peggy-feature">
+                    <img src="peggy.jpeg" alt="Peggy">
+                </div>
+
+                <div class="hero-vertical">Peggy // Featured</div>
             </div>
 
             <div class="hero-right">
@@ -598,6 +638,7 @@
                     </p>
                 </div>
             </div>
+
             <div class="cards-grid" id="latest-grid"></div>
         </section>
 
@@ -611,6 +652,7 @@
                     </p>
                 </div>
             </div>
+
             <div class="cards-grid" id="mods-grid"></div>
         </section>
 
@@ -624,6 +666,7 @@
                     </p>
                 </div>
             </div>
+
             <div class="cards-grid" id="plugins-grid"></div>
         </section>
 
@@ -637,6 +680,7 @@
                     </p>
                 </div>
             </div>
+
             <div class="cards-grid" id="themes-grid"></div>
         </section>
 
@@ -645,6 +689,7 @@
         </footer>
     </div>
 
-    <script src="marketplace.js"></script>
+    <script src="marketplace.js?v=11"></script>
 </body>
 </html>
+```
