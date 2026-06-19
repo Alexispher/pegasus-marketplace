@@ -1,4 +1,3 @@
-```python
 import json
 from pathlib import Path
 
@@ -85,4 +84,3 @@ def generate_index():
 
 if __name__ == "__main__":
     generate_index()
-```
