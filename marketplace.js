@@ -1,4 +1,3 @@
-```javascript
 const CATEGORIES = ["mods", "plugins", "themes"];
 
 let marketplaceData = {
@@ -47,9 +46,6 @@ function createCard(item) {
 
     if (downloadButton) {
         actions.appendChild(downloadButton);
-    }
-
-    if (actions.childNodes.length > 0) {
         card.appendChild(actions);
     }
 
@@ -110,7 +106,6 @@ function createCard(item) {
 
 function renderEmptyState(containerId, message) {
     const container = document.getElementById(containerId);
-
     if (!container) return;
 
     container.innerHTML = "";
@@ -124,7 +119,6 @@ function renderEmptyState(containerId, message) {
 
 function renderCategory(containerId, items) {
     const container = document.getElementById(containerId);
-
     if (!container) return;
 
     container.innerHTML = "";
@@ -158,7 +152,6 @@ function getAllItems() {
 
 function renderLatest() {
     const latestContainer = document.getElementById("latest-grid");
-
     if (!latestContainer) return;
 
     latestContainer.innerHTML = "";
@@ -173,13 +166,10 @@ function renderLatest() {
     const sortedItems = allItems.sort((a, b) => {
         const dateA = new Date(a.added_at || "1970-01-01").getTime();
         const dateB = new Date(b.added_at || "1970-01-01").getTime();
-
         return dateB - dateA;
     });
 
-    const latestItems = sortedItems.slice(0, 6);
-
-    latestItems.forEach(item => {
+    sortedItems.slice(0, 6).forEach(item => {
         latestContainer.appendChild(createCard(item));
     });
 }
@@ -214,9 +204,6 @@ async function loadMarketplace() {
         renderCategory("mods-grid", marketplaceData.mods);
         renderCategory("plugins-grid", marketplaceData.plugins);
         renderCategory("themes-grid", marketplaceData.themes);
-
-        setupPageRouter();
-
     } catch (error) {
         console.error("Failed to load marketplace:", error);
 
@@ -224,9 +211,9 @@ async function loadMarketplace() {
         renderEmptyState("mods-grid", "Marketplace index not found.");
         renderEmptyState("plugins-grid", "Marketplace index not found.");
         renderEmptyState("themes-grid", "Marketplace index not found.");
-
-        setupPageRouter();
     }
+
+    setupPageRouter();
 }
 
 function getCurrentRoute() {
@@ -245,10 +232,9 @@ function showRoute(routeName) {
 
     allSections.forEach(sectionId => {
         const section = document.getElementById(sectionId);
-
         if (!section) return;
 
-        section.style.display = visibleSections.includes(sectionId) ? "" : "none";
+        section.hidden = !visibleSections.includes(sectionId);
     });
 
     updateActiveNav(routeName);
@@ -272,7 +258,6 @@ function setupPageRouter() {
             event.preventDefault();
 
             const routeName = link.getAttribute("href").replace("#", "");
-
             if (!ROUTES[routeName]) return;
 
             history.pushState(null, "", `#${routeName}`);
@@ -289,7 +274,6 @@ function setupPageRouter() {
 
 function setupStarfield() {
     const canvas = document.getElementById("starfield");
-
     if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
@@ -364,6 +348,7 @@ function setupStarfield() {
     drawStars();
 }
 
-setupStarfield();
-loadMarketplace();
-```
+document.addEventListener("DOMContentLoaded", () => {
+    setupStarfield();
+    loadMarketplace();
+});
