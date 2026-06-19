@@ -2,14 +2,20 @@
   "mods": [
     {
       "id": "pegasus-typewriter",
-      "name": "Pegasus Typewriter",
+      "name": "PEGASUS Typewriter",
       "category": "mods",
       "path": "Mods/pegasus-typewriter",
-      "description": "",
-      "version": "",
-      "author": "",
-      "cover": "",
-      "tags": []
+      "description": "A minimalist writing plugin for PEGASUS with autosave, page navigation, PDF export and DOCX export.",
+      "version": "1.0.0",
+      "author": "Alexispher",
+      "cover": "Mods/pegasus-typewriter/cover.png",
+      "tags": [
+        "writing",
+        "editor",
+        "pdf",
+        "docx",
+        "autosave"
+      ]
     }
   ],
   "plugins": [],
