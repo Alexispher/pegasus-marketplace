@@ -23,16 +23,22 @@
   "plugins": [
     {
       "id": "nodejs",
-      "name": "Nodejs",
+      "name": "Node.js V8 Engine",
       "category": "plugins",
       "path": "Plugins/nodejs",
-      "description": "",
-      "version": "",
-      "author": "",
-      "cover": "",
+      "description": "A lightweight plugin for PEGASUS that enables direct execution of JavaScript (.js) files using the system's Node.js engine.",
+      "version": "1.0.0",
+      "author": "Alexispher",
+      "cover": "Plugins/nodejs/cover.png",
       "download": "packages/plugins/nodejs.zip",
       "added_at": "",
-      "tags": []
+      "tags": [
+        "javascript",
+        "engine",
+        "nodejs",
+        "runner",
+        "execution"
+      ]
     }
   ],
   "themes": []
