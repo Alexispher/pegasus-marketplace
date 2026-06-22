@@ -1,5 +1,5 @@
 {
-  "name": "Node.js V8 Engine",
+  "name": "Node.js",
   "description": "A lightweight plugin for PEGASUS that enables direct execution of JavaScript (.js) files using the system's Node.js engine.",
   "version": "1.0.0",
   "author": "Alexispher",
