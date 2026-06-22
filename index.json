@@ -20,6 +20,20 @@
       ]
     }
   ],
-  "plugins": [],
+  "plugins": [
+    {
+      "id": "nodejs",
+      "name": "Nodejs",
+      "category": "plugins",
+      "path": "Plugins/nodejs",
+      "description": "",
+      "version": "",
+      "author": "",
+      "cover": "",
+      "download": "packages/plugins/nodejs.zip",
+      "added_at": "",
+      "tags": []
+    }
+  ],
   "themes": []
 }
